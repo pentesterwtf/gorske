@@ -1,4 +1,5 @@
 use crate::{gorske::*, text_input::TextInput};
+use numsep::*;
 use yew::prelude::*;
 
 /// Used to send a Message notifying a state change from UI functions to code
@@ -24,8 +25,9 @@ impl App {
     /// Used for UI rendering
     fn regenerate_gorske_cost(&self) -> String {
         let hourly_rate = calculate_hourly_salary(self.average_yearly_salary);
-        let g_cost = calculate_gorske_cost(self.hours, hourly_rate, self.staff_count);
-        format!("Gorske cost: {} GU / year", g_cost)
+        let c = calculate_gorske_cost(self.hours, hourly_rate, self.staff_count);
+        let cost = separate(c, Locale::English);
+        format!("Gorske cost: {} GU / year", cost)
     }
 
     /// Regenerates the BigMac cost with a given input
@@ -33,8 +35,9 @@ impl App {
     /// Used for UI rendering
     fn regenerate_bigmac_cost(&self) -> String {
         let hourly_rate = calculate_hourly_salary(self.average_yearly_salary);
-        let g_cost = calculate_bigmac_cost(self.hours, hourly_rate, self.staff_count);
-        format!("BigMac Cost: {} BigMacs / year", g_cost)
+        let c = calculate_bigmac_cost(self.hours, hourly_rate, self.staff_count);
+        let cost = separate(c, Locale::English);
+        format!("BigMac Cost: {} BigMacs / year", cost)
     }
 
     /// Regenerates the Actual cost with a given input
@@ -42,8 +45,9 @@ impl App {
     /// Used for UI rendering
     fn regenerate_actual_cost(&self) -> String {
         let hourly_rate = calculate_hourly_salary(self.average_yearly_salary);
-        let g_cost = calculate_cost(self.hours, hourly_rate, self.staff_count);
-        format!("Dollar cost: ${} / year", g_cost)
+        let c = calculate_cost(self.hours, hourly_rate, self.staff_count);
+        let cost = separate(c, Locale::English);
+        format!("Dollar cost: ${} / year", cost)
     }
 
     fn get_bigmac_string(&self) -> String {

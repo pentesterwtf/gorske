@@ -1,13 +1,12 @@
-use crate::{
-    gorske::{
-        calculate_bigmac_cost, calculate_cost, calculate_gorkse_cost, calculate_hourly_salary,
-        get_gorske,
-    },
-    text_input::TextInput,
-};
+use crate::{gorske::*, text_input::TextInput};
+use numsep::*;
 use yew::prelude::*;
 
-pub enum Msg {
+/// Used to send a Message notifying a state change from UI functions to code
+///
+/// i.e. a text field is updated, which will send a StateChangeMessage, which is handled
+/// by the framework to process
+pub enum StateChangeMessage {
     SetHours(String),
     SetStaffCount(String),
     SetAverageSalary(String),
@@ -15,58 +14,40 @@ pub enum Msg {
 
 #[derive(Debug, Default)]
 pub struct App {
-    hours: String,
-    staff_count: String,
-    average_yearly_salary: String,
+    hours: f32,
+    staff_count: f32,
+    average_yearly_salary: f32,
 }
 
 impl App {
-    fn regenerate_gorkse_cost(&self) -> String {
-        if self.hours.is_empty() {
-            return "Cost/Year in Gorske Unit".to_string();
-        }
-
-        let hours: f32 = self.hours.parse::<f32>().unwrap_or(0.0);
-        let hourly_rate =
-            calculate_hourly_salary(self.average_yearly_salary.parse::<i32>().unwrap_or(0));
-        let res = calculate_gorkse_cost(
-            hours,
-            hourly_rate,
-            self.staff_count.parse::<i32>().unwrap_or(0),
-        );
-        format!("Gorske cost: {} GU / year", res)
+    /// Regenerates the Gorske cost with a given input
+    ///
+    /// Used for UI rendering
+    fn regenerate_gorske_cost(&self) -> String {
+        let hourly_rate = calculate_hourly_salary(self.average_yearly_salary);
+        let c = calculate_gorske_cost(self.hours, hourly_rate, self.staff_count);
+        let cost = separate(c, Locale::English);
+        format!("Gorske cost: {} GU / year", cost)
     }
 
+    /// Regenerates the BigMac cost with a given input
+    ///
+    /// Used for UI rendering
     fn regenerate_bigmac_cost(&self) -> String {
-        if self.hours.is_empty() {
-            return "Cost/Year in BigMacs".to_string();
-        }
-
-        let hours: f32 = self.hours.parse::<f32>().unwrap_or(0.0);
-        let hourly_rate =
-            calculate_hourly_salary(self.average_yearly_salary.parse::<i32>().unwrap_or(1));
-        let res = calculate_bigmac_cost(
-            hours,
-            hourly_rate,
-            self.staff_count.parse::<i32>().unwrap_or(0),
-        );
-        format!("BigMac Cost: {} BigMacs / year", res)
+        let hourly_rate = calculate_hourly_salary(self.average_yearly_salary);
+        let c = calculate_bigmac_cost(self.hours, hourly_rate, self.staff_count);
+        let cost = separate(c, Locale::English);
+        format!("BigMac Cost: {} BigMacs / year", cost)
     }
 
+    /// Regenerates the Actual cost with a given input
+    ///
+    /// Used for UI rendering
     fn regenerate_actual_cost(&self) -> String {
-        if self.hours.is_empty() {
-            return "Cost/Year in Australian Dollarydoos".to_string();
-        }
-
-        let hours: f32 = self.hours.parse::<f32>().unwrap_or(0.0);
-        let hourly_rate =
-            calculate_hourly_salary(self.average_yearly_salary.parse::<i32>().unwrap_or(0));
-        let res = calculate_cost(
-            hours,
-            hourly_rate,
-            self.staff_count.parse::<i32>().unwrap_or(0),
-        );
-        format!("Dollar cost: ${} / year", res)
+        let hourly_rate = calculate_hourly_salary(self.average_yearly_salary);
+        let c = calculate_cost(self.hours, hourly_rate, self.staff_count);
+        let cost = separate(c, Locale::English);
+        format!("Dollar cost: ${} / year", cost)
     }
 
     fn get_bigmac_string(&self) -> String {
@@ -81,32 +62,34 @@ impl App {
 }
 
 impl Component for App {
-    type Message = Msg;
+    type Message = StateChangeMessage;
     type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
         Self {
-            hours: "10".into(),
-            staff_count: "1".into(),
-            average_yearly_salary: "100000".into(),
+            hours: 10.0,
+            staff_count: 1.0,
+            average_yearly_salary: 100000.0,
         }
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::SetHours(hours) => self.hours = hours,
-            Msg::SetStaffCount(staff_count) => self.staff_count = staff_count,
-            Msg::SetAverageSalary(average_yearly_salary) => {
-                self.average_yearly_salary = average_yearly_salary
+            StateChangeMessage::SetHours(hours) => self.hours = hours.parse::<f32>().unwrap_or(0.0),
+            StateChangeMessage::SetStaffCount(staff_count) => {
+                self.staff_count = staff_count.parse::<f32>().unwrap_or(0.0)
+            }
+            StateChangeMessage::SetAverageSalary(average_yearly_salary) => {
+                self.average_yearly_salary = average_yearly_salary.parse::<f32>().unwrap_or(0.0)
             }
         };
         true
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let change_hours = ctx.link().callback(Msg::SetHours);
-        let change_staff_count = ctx.link().callback(Msg::SetStaffCount);
-        let change_average_salary = ctx.link().callback(Msg::SetAverageSalary);
+        let change_hours = ctx.link().callback(StateChangeMessage::SetHours);
+        let change_staff_count = ctx.link().callback(StateChangeMessage::SetStaffCount);
+        let change_average_salary = ctx.link().callback(StateChangeMessage::SetAverageSalary);
         html! {
 
             <main>
@@ -137,24 +120,24 @@ impl Component for App {
                         </div>
                     </div>
                     <div>
-                        <TextInput on_change= {change_hours} value={{self.hours.clone()}} />
+                        <TextInput on_change= {change_hours} value={{self.hours.clone().to_string()}} />
                     </div>
 
                     <div>
                     {"Enter in average yearly salary for FTE:"}
 
-                     <TextInput on_change= {change_average_salary} value={{self.average_yearly_salary.clone()}} />
+                     <TextInput on_change= {change_average_salary} value={{self.average_yearly_salary.clone().to_string()}} />
 
                     <div>
                     {"Enter in number of FTE affected:"}
-                     <TextInput on_change= {change_staff_count} value={{self.staff_count.clone()}} />
+                     <TextInput on_change= {change_staff_count} value={{self.staff_count.clone().to_string()}} />
                     </div>
                 </div>
 
                 </div>
                 <div class="readout">
                     <div>
-                        {self.regenerate_gorkse_cost()}
+                        {self.regenerate_gorske_cost()}
                     </div>
                     <div>
                         {self.regenerate_bigmac_cost()}

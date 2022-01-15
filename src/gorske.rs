@@ -1,30 +1,30 @@
-pub const BIGMAC_PRICE: f32 = 6.40; // Price of a Single Big Mac, in AUD
-const GORSKE_TOTAL: i32 = 30000; //Total number of Gorske eaten by our Hero
+// Price of a Single Big Mac, in AUD
+pub const BIGMAC_PRICE: f32 = 6.40;
+// Total number of BigMacs eaten by Our Hero
+// Whcih gives us one Gorske unit
+const GORSKE_TOTAL: f32 = 30000.0;
 
+/// Gets us a const for Gorske unit
 pub fn get_gorske() -> f32 {
-    let g: f32 = BIGMAC_PRICE * GORSKE_TOTAL as f32;
-    g
+    BIGMAC_PRICE * GORSKE_TOTAL
 }
 
-pub fn calculate_cost(hours: f32, hourly_rate: f32, staff_count: i32) -> f32 {
-    // Calculates our wasted cost
-
-    let cost = hours * hourly_rate as f32 * staff_count as f32 * 52 as f32;
-    cost
- 
+/// Calculates our wasted cost in Dollarydoos
+pub fn calculate_cost(hours: f32, hourly_rate: f32, staff_count: f32) -> f32 {
+    hours * hourly_rate * staff_count as f32 * 52.0
 }
 
-pub fn calculate_hourly_salary(yearly_salary: i32) -> f32 {
-    // Converts a yearly salary into a hourly salary
-    let hourly: f32 = yearly_salary as f32 / 52.0 / 40.0;
-    hourly
+/// Converts a yearly salary into a hourly salary
+pub fn calculate_hourly_salary(yearly_salary: f32) -> f32 {
+    yearly_salary as f32 / 52.0 / 40.0
 }
 
-pub fn calculate_gorkse_cost(hours: f32, hourly_rate: f32, staff_count: i32) -> f32 {
+/// Calculates a given cost and outputs in Gorske
+pub fn calculate_gorske_cost(hours: f32, hourly_rate: f32, staff_count: f32) -> f32 {
     calculate_cost(hours, hourly_rate, staff_count) / get_gorske()
 }
 
-
-pub fn calculate_bigmac_cost(hours: f32, hourly_rate: f32, staff_count: i32) -> f32 {
+/// Calculates a given cost and outputs in BigMac's
+pub fn calculate_bigmac_cost(hours: f32, hourly_rate: f32, staff_count: f32) -> f32 {
     calculate_cost(hours, hourly_rate, staff_count) / BIGMAC_PRICE
 }

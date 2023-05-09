@@ -13,6 +13,6 @@ publish = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
 yew = "0.19.3"
-web-sys = { version = "0.3.61", features = ["Event","EventTarget","InputEvent"] }
-wasm-bindgen = "0.2.84"
+web-sys = { version = "0.3.62", features = ["Event","EventTarget","InputEvent"] }
+wasm-bindgen = "0.2.85"
 numsep = "0.1.12"
